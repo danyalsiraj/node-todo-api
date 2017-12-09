@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^1.0.3",
-    "mongodb": "^2.2.33"
+    "mongodb": "^2.2.33",
+    "validator": "^9.2.0"
   }
 }
