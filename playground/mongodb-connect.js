@@ -1,4 +1,11 @@
-const MongoClient = require('mongodb').MongoClient;
+//const MongoClient = require('mongodb').MongoClient;
+const {
+  MongoClient,
+  ObjectID
+} = require('mongodb'); //destructuring
+
+// var obj = new ObjectID();
+// console.log(obj);
 
 MongoClient.connect('mongodb://localhost:27017/TodoApi', (err, db) => { //connect takes two arguments db adress and callback
   //mongo automatically creates the database as soon as we start writing data to it
@@ -7,7 +14,7 @@ MongoClient.connect('mongodb://localhost:27017/TodoApi', (err, db) => { //connec
     return console.log('Unable to connect to database');
   }
   console.log('connected to mongodb server');
-  ////To add to collection
+  //To add to collection
   // db.collection('Todos').insertOne({
   //   text: 'Something to Do',
   //   completed: false
@@ -18,15 +25,15 @@ MongoClient.connect('mongodb://localhost:27017/TodoApi', (err, db) => { //connec
   //   console.log(JSON.stringify(result.ops, undefined, 2)); //ops stores all the documents that were inserted
   // });
 
-  db.collection('Users').insertOne({
-    name: 'Danyal',
-    age: 23,
-    location: 'Canada'
-  }, (err, result) => {
-    if (err) {
-      return console.log('unable to insert user');
-    }
-    console.log(result.ops);
-  });
+  // db.collection('Users').insertOne({
+  //   name: 'Danyal',
+  //   age: 23,
+  //   location: 'Canada'
+  // }, (err, result) => {
+  //   if (err) {
+  //     return console.log('unable to insert user');
+  //   }
+  //   console.log(result.ops);
+  // });
   db.close();
 });
