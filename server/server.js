@@ -22,6 +22,8 @@ app.post('/todos', async (req, res) => {
 
 const port = process.env.PORT || 3000; // heroku sets a custom port every time, this uses 3000 if no other port is set
 
-app.listen(port, () => {
+let server = app.listen(port, () => {
   console.log(`Server is up on port ${port}!`);
 }); //listens to the port
+
+module.exports = server;
