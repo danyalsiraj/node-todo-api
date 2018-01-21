@@ -1,78 +1,27 @@
-var mongoose = require('mongoose');
+var Todo = require('./models/todo');
+var User = require('./models/user');
 
-mongoose.Promise - global.Promise;
-mongoose.connect('mongodb://localhost:27017/TodoApp');
+const express = require('express'),
+  bodyParser = require('body-parser');
+let app = express();
 
-var Todo = mongoose.model('Todo', {
-  text: {
-    type: String
-  },
-  completed: {
-    type: Boolean
-  },
-  completedAt: {
-    type: Date
-  }
-});
-
-// var newTodo = new Todo({
-//   text: 'DO this1'
-// });
-// save(newTodo);
-// var newTodo2 = new Todo({
-//   text: 'do this too',
-//   completed: false
-// });
-// save(newTodo2).then((res) => {
-//   console.log(res);
-//   if (res._id) {
-//     newTodo2.completedAt = res._id.getTimestamp();
-//   }
-//   save(newTodo2);
-// });
-
-const createTask = async (req, res) => {
+app.use(bodyParser.json());
+app.post('/todos', async (req, res) => {
   console.log(req.body);
-  let task = await save(new Todo(req.body));
-  if (!task._id) {
-    res.status(404).send()
-    return
-  } else {
-    res.status(200).json({
-      task
-    })
-  }
-}
-
-function save(task) {
-  return task.save()
-    .then((result) => {
-      //console.log('task saved', result);
-      return result;
+  let task = new Todo(req.body);
+  task.save().then(
+    (result) => {
+      res.status(201).json({
+        todo: task
+      })
     }, (err) => {
-      //console.log('task not saved', err);
-      return err;
-    });
-}
-
-var User = mongoose.model('Users', {
-  email: {
-    trim: true,
-    required: true,
-    minlength: 1,
-    type: String
-  }
-});
-var newUser = new User({
-  email: 'aaa'
+      res.status(400).send(err)
+      return
+    })
 })
-save(newUser);
 
-// newTodo.save().then((result) => {
-//   console.log('task saved', result);
-// }, (err) => {
-//   console.log('task not saved', err);
-// });
-module.exports = {
-  createTask
-}
+const port = process.env.PORT || 3000; // heroku sets a custom port every time, this uses 3000 if no other port is set
+
+app.listen(port, () => {
+  console.log(`Server is up on port ${port}!`);
+}); //listens to the port
