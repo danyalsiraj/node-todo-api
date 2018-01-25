@@ -19,6 +19,39 @@ app.post('/todos', async (req, res) => {
       return
     })
 })
+app.get('/todos/:id', async (req, res) => {
+  if (req.params.id) {
+    Todo.findOne({
+      _id: req.params.id
+    }, (err, todo) => {
+      if (todo) {
+        res.status(200).json({
+          todo
+        })
+      }
+      if (err) {
+        res.status(400).send(err)
+      }
+      return;
+    })
+  }
+  res.status(404).send()
+
+})
+app.get('/todos', async (req, res) => {
+  Todo.find({}, (err, todos) => {
+    if (todos) {
+      res.status(200).json({
+        todos
+      })
+    }
+    if (err) {
+      res.status(400).send(err)
+    }
+    return;
+  })
+
+})
 
 const port = process.env.PORT || 3000; // heroku sets a custom port every time, this uses 3000 if no other port is set
 
