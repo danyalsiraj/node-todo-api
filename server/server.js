@@ -2,7 +2,8 @@ var Todo = require('./models/todo');
 var User = require('./models/user');
 
 const express = require('express'),
-  bodyParser = require('body-parser');
+  bodyParser = require('body-parser'),
+  ObjectID = require('mongodb').ObjectID;
 let app = express();
 
 app.use(bodyParser.json());
@@ -98,6 +99,51 @@ app.put('/todos/:id', async (req, res) => {
 
 })
 
+app.post('/users', async (req, res) => {
+  let user = new User(req.body)
+  user._id = new ObjectID();
+  let token = user.generateAuthToken();
+  user.save({}, (err, user) => {
+    if (err) {
+      res.status(400).send(err)
+      return
+    }
+    if (user) {
+      res.status(200).header('x-auth', token).json({
+        user
+      })
+    }
+  })
+})
+
+var authenticate = async (req, res, next) => {
+  let user = await User.getUserByToken(req.header('x-auth'))
+  if (user) {
+    req.user = user
+    next()
+  } else {
+    res.status(401).send()
+  }
+
+}
+app.get('/users/me', authenticate, async (req, res) => {
+  res.status(200).json({
+    user: req.user
+  })
+})
+
+app.get('/users/:id', async (req, res) => {
+
+})
+app.get('/users', async (req, res) => {
+
+})
+app.delete('/users/:id', async (req, res) => {
+
+})
+app.put('/users/:id', async (req, res) => {
+
+})
 
 const port = process.env.PORT || 3000; // heroku sets a custom port every time, this uses 3000 if no other port is set
 
