@@ -102,6 +102,7 @@ app.put('/todos/:id', async (req, res) => {
 app.post('/users', async (req, res) => {
   let user = new User(req.body)
   user._id = new ObjectID();
+  user.password = user.hashPass(req.body.password)
   let token = user.generateAuthToken();
   user.save({}, (err, user) => {
     if (err) {
@@ -115,6 +116,23 @@ app.post('/users', async (req, res) => {
     }
   })
 })
+app.post('/login', async (req, res) => {
+  let useremail = req.body.email,
+    password = req.body.password
+  User.findOne({
+    email: useremail
+  }, (err, retrivedUser) => {
+    if (err || !retrivedUser.compareHash(password)) {
+      res.status(401).send()
+      return
+    }
+    let token = retrivedUser.generateAuthToken();
+    res.status(200).header('x-auth', token).json({
+      user: retrivedUser
+    })
+
+  })
+})
 
 var authenticate = async (req, res, next) => {
   let user = await User.getUserByToken(req.header('x-auth'))
@@ -126,6 +144,15 @@ var authenticate = async (req, res, next) => {
   }
 
 }
+app.delete('/logout', authenticate, async (req, res) => {
+  let logout = req.user.removeToken(req.header('x-auth'))
+  if (!logout) {
+    res.status(401).send()
+    return
+  }
+  res.status(200).send()
+
+})
 app.get('/users/me', authenticate, async (req, res) => {
   res.status(200).json({
     user: req.user

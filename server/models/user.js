@@ -1,6 +1,7 @@
 const mongoose = require('../db/mongoose'),
   validator = require('validator'),
-  jwt = require('jsonwebtoken')
+  jwt = require('jsonwebtoken'),
+  bcrypt = require('bcrypt')
 
 var UserSchema = new mongoose.Schema({
   email: {
@@ -47,6 +48,24 @@ UserSchema.methods.generateAuthToken = function() { //arrow functions cannot use
   return token
 }
 
+UserSchema.methods.hashPass = function(password) {
+  let saltRounds = 10
+  return bcrypt.hashSync(password, saltRounds);
+}
+UserSchema.methods.compareHash = function(password) {
+  return bcrypt.compareSync(password, this.password)
+}
+UserSchema.methods.removeToken = async function(token) {
+  //$pull--lets you remove specific objects from array
+  let user = this
+  return await user.update({
+    $pull: {
+      tokens: {
+        token
+      }
+    }
+  })
+}
 UserSchema.statics.getUserByToken = async function(token) {
   let decoded = ''
   try {
