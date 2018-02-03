@@ -7,9 +7,10 @@ const express = require('express'),
 let app = express();
 
 app.use(bodyParser.json());
-app.post('/todos', async (req, res) => {
-  console.log(req.body);
+app.post('/todos', authenticate, async (req, res) => {
+  console.log(req.body)
   let task = new Todo(req.body);
+  task._author = req.user._id
   task.save().then(
     (result) => {
       res.status(201).json({
@@ -21,9 +22,10 @@ app.post('/todos', async (req, res) => {
     })
 })
 
-app.get('/todos/:id', async (req, res) => {
+app.get('/todos/:id', authenticate, async (req, res) => {
   Todo.findOne({
-    _id: req.params.id
+    _id: req.params.id,
+    _author: req.user._id
   }, (err, todo) => {
     if (err) {
       res.status(400).send(err)
@@ -40,9 +42,12 @@ app.get('/todos/:id', async (req, res) => {
 
   })
 
+
 })
-app.get('/todos', async (req, res) => {
-  Todo.find({}, (err, todos) => {
+app.get('/todos', authenticate, async (req, res) => {
+  Todo.find({
+    _author: req.user._id
+  }, (err, todos) => {
     if (todos) {
       res.status(200).json({
         todos
@@ -55,9 +60,11 @@ app.get('/todos', async (req, res) => {
   })
 
 })
-app.delete('/todos/:id', async (req, res) => {
+app.delete('/todos/:id', authenticate, async (req, res) => {
   Todo.remove({
-    _id: req.params.id
+    _id: req.params.id,
+    _author: req.user._id
+
   }, (err, removed) => {
     if (err) {
       res.status(400).send(err)
@@ -74,9 +81,11 @@ app.delete('/todos/:id', async (req, res) => {
   })
 
 })
-app.put('/todos/:id', async (req, res) => {
+app.put('/todos/:id', authenticate, async (req, res) => {
   Todo.findOneAndUpdate({
-    _id: req.params.id
+    _id: req.params.id,
+    _author: req.user._id
+
   }, {
     $set: {
       text: req.body.text,
@@ -118,23 +127,27 @@ app.post('/users', async (req, res) => {
 })
 app.post('/login', async (req, res) => {
   let useremail = req.body.email,
-    password = req.body.password
-  User.findOne({
-    email: useremail
-  }, (err, retrivedUser) => {
-    if (err || !retrivedUser.compareHash(password)) {
-      res.status(401).send()
-      return
-    }
-    let token = retrivedUser.generateAuthToken();
-    res.status(200).header('x-auth', token).json({
-      user: retrivedUser
-    })
+    password = req.body.password,
+    retrivedUser = ''
 
+  retrivedUser = await User.findOne({
+    email: useremail
+  }).catch(err => {
+    return null
+  });
+  if (!retrivedUser || !retrivedUser.compareHash(password)) {
+    res.status(401).send()
+    return
+  }
+  let token = retrivedUser.generateAuthToken();
+  await retrivedUser.save();
+  res.status(200).header('x-auth', token).json({
+    user: retrivedUser
   })
+
 })
 
-var authenticate = async (req, res, next) => {
+async function authenticate(req, res, next) {
   let user = await User.getUserByToken(req.header('x-auth'))
   if (user) {
     req.user = user

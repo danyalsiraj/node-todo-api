@@ -35,6 +35,7 @@ var UserSchema = new mongoose.Schema({
 //this is an instance method
 UserSchema.methods.generateAuthToken = function() { //arrow functions cannot use this keyword thats why we cant use it
   var user = this
+  console.log(user);
   var access = 'auth'
   var token = jwt.sign({
     _id: user._id.toHexString(),
@@ -71,7 +72,9 @@ UserSchema.statics.getUserByToken = async function(token) {
   try {
     decoded = jwt.verify(token, 'secret')
     return await User.findOne({
-      _id: decoded._id
+      _id: decoded._id,
+      "tokens.token": token
+
     })
   } catch (err) {
     return null
