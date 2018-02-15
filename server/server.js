@@ -5,7 +5,10 @@ const express = require('express'),
   bodyParser = require('body-parser'),
   ObjectID = require('mongodb').ObjectID;
 let app = express();
-
+app.use((req, res, next)=>{
+  console.log(`${req.method} ${req.originalUrl}`)
+  next();
+})
 app.use(bodyParser.json());
 app.post('/todos', authenticate, async (req, res) => {
   console.log(req.body)
