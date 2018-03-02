@@ -9,8 +9,8 @@ const express = require('express'),
 
 let app = express();
 const corsOptions = {
-  exposedHeaders: 'x-auth',
-  allowedHeaders: 'x-auth'
+  exposedHeaders: 'Content-Type,Content-Length,Authorization,Accept,X-Requested-With,x-auth',
+  allowedHeaders: 'Content-Type,Content-Length,Authorization,Accept,X-Requested-With,x-auth'
 };
 app.use(cors(corsOptions));
 app.use((req, res, next)=>{
