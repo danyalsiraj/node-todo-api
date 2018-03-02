@@ -5,10 +5,14 @@ var cors=require('cors')
 const express = require('express'),
   bodyParser = require('body-parser'),
   ObjectID = require('mongodb').ObjectID;
-  
+
 
 let app = express();
-app.use(cors());
+const corsOptions = {
+  exposedHeaders: 'x-auth',
+  allowedHeaders: 'x-auth'
+};
+app.use(cors(corsOptions));
 app.use((req, res, next)=>{
   console.log(`${req.method} ${req.originalUrl}`)
   next();
