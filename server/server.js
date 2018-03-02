@@ -1,10 +1,14 @@
 var Todo = require('./models/todo');
 var User = require('./models/user');
+var cors=require('cors')
 
 const express = require('express'),
   bodyParser = require('body-parser'),
   ObjectID = require('mongodb').ObjectID;
+  
+
 let app = express();
+app.use(cors());
 app.use((req, res, next)=>{
   console.log(`${req.method} ${req.originalUrl}`)
   next();
